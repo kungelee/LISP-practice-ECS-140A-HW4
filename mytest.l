@@ -2,6 +2,14 @@
 
 (defun test (received expected) (pprint (if (equal received expected) 'ok (list 'ERR 'received received ': expected 'expected))))
 
+; test all-length
+(print 'all-length)
+(test (all-length '()) 0)
+(test (all-length '(2 a n)) 3)
+(test (all-length '((r p) a n)) 4)
+(test (all-length '((r p) (a n))) 4)
+(test (all-length '(p (r p) x (a n))) 6)
+
 ; test find-min
 (print 'find-min)
 (test (find-min '(3 3 3 4 9 7) 0) 0)
