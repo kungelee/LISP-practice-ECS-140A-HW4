@@ -29,6 +29,9 @@
 
 ; Write a function before that searches a list and returns a list of all elements in between the first two
 ; arguments (inclusive).
+; 
+; If only the first argument appears in the list, before returns a list containing all the elements from the
+; first occurrence of the first argument to the end of the list.
 (defun before (lst start finish)
 	(if (equal start (car lst))
 		(cons start (until (cdr lst) finish))
@@ -41,12 +44,17 @@
 		((equal (car lst) finish) (list finish)) ; matches finish
 		(t (cons (car lst) (until (cdr lst) finish))))) ; recurse
 
-; If only the first argument appears in the list, before returns a list containing all the elements from the
-; first occurrence of the first argument to the end of the list.
-; 
 ; Write a function split-if that returns a list into two parts. It takes two arguments: a function (f) and
 ; a list. All members for which f is true go into one list, and the rest go into another list.
-; (defun split-if)
+(defun split-if (f lst)
+	(list (filter f lst) (filter (lambda (x) (not (funcall f x))) lst)))
+
+; Support function for split-fi. Returns a list containing all elements of lst for which function f returns truthy.
+(defun filter (f lst)
+	(cond
+		((null lst) nil) ; input is empty: return empty
+		((funcall f (car lst)) (cons (car lst) (filter f (cdr lst))))
+		(t (filter f (cdr lst)))))
 
 ; Write a function group that takes arguments: a list l and a number n. It returns a new list in which the
 ; elements of l are grouped into sublists of length n. The remainder is put in a final sublist.

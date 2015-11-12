@@ -34,3 +34,12 @@
 (test (before '(1 2 (3) (6 4) (0 0) 9 (5) 11 9) '(6 4) '(5)) '((6 4) (0 0) 9 (5)))
 (test (before '(1 2 3 6 5 0 0 6 9 11 9) 6 6) '(6 5 0 0 6))
 (test (before '(1 2 3 6 5 0 0 9 11 9) 6 6) '(6 5 0 0 9 11 9))
+
+; test filter
+(print 'filter)
+(test (filter (lambda (i) (< i 6)) '(2 5 3 7 9 2 5 6 8)) '(2 5 3 2 5))
+(test (filter (lambda (i) (not ((lambda (i) (< i 6)) i))) '(2 5 3 7 9 2 5 6 8)) '(7 9 6 8))
+
+; test split-if
+(print 'split-if)
+(test (split-if (lambda (i) (< i 6)) '(9 4 7 11 67 22 2 0 88 3)) '((4 2 0 3) (9 7 11 67 22 88)))
