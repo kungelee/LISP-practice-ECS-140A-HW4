@@ -29,7 +29,17 @@
 
 ; Write a function before that searches a list and returns a list of all elements in between the first two
 ; arguments (inclusive).
-; (defun before)
+(defun before (lst start finish)
+	(if (equal start (car lst))
+		(cons start (until (cdr lst) finish))
+		(before (cdr lst) start finish)))
+
+; Support function for before. Returns a list containing all elements from the beginning of lst to finish (inclusive).
+(defun until (lst finish)
+	(cond 
+		((null lst) nil) ; empty list
+		((equal (car lst) finish) (list finish)) ; matches finish
+		(t (cons (car lst) (until (cdr lst) finish))))) ; recurse
 
 ; If only the first argument appears in the list, before returns a list containing all the elements from the
 ; first occurrence of the first argument to the end of the list.
