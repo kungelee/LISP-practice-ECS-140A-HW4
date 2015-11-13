@@ -78,6 +78,20 @@
 ; from the given function:
 	; > (mostn #’length ’((a b) (a b c) (a) (e f g)))
 	; ( ((A B C) (E F G)) 3)
+; (defun mostn ())
+
+; Support mostn. Does all the heavy lifting.
+(defun mostn-helper (f src dst hiscore)
+	(if (eql nil src) (list dst hiscore)
+		(let* ((item (car src)) (itemscore (funcall f item)))
+			(cond
+				((> itemscore hiscore) ; change hiscore, replace dst
+					(mostn-helper f (cdr src) (list item) itemscore))
+				((= itemscore hiscore)
+					(mostn-helper f (cdr src) (append dst (list item)) hiscore))
+				(t
+					(mostn-helper f (cdr src) dst hiscore))
+			))))
 
 ; Write a function match that compares a pattern and an assertion. When a pattern containing no special
 ; atoms is compared to an assertion, the two match only if they are exactly the same, with each corresponding

@@ -52,3 +52,5 @@
 (print 'group)
 (test (group '(a b c d e f g) 2) '((A B) (C D) (E F) (G)))
 
+(print 'mostn-helper)
+(test (mostn-helper #'length '((a b) (a b c) (a) (e f g)) nil 0) '( ((A B C) (E F G)) 3))
