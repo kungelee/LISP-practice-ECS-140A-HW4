@@ -31,9 +31,9 @@
 ; If only the 'start' argument appears in the list, return a list containing all the elements from the
 ; first occurrence of the 'start' argument to the end of the list.
 (defun before (start finish lst)
-	(if (equal start (car lst))
-		(cons start (until (cdr lst) finish))
-		(before start finish (cdr lst))))
+	(cond ((null lst) nil) ; list is empty. fail
+		((equal start (car lst)) (cons start (until (cdr lst) finish))) ; list head matches 'start'; call 'until'
+		(t (before start finish (cdr lst))))) ; no match, but list is not empty; recurse
 
 ; Support function for 'before'. Returns a list containing all elements from the beginning of lst to a list item
 ; that matches 'finish' (inclusive).
@@ -75,7 +75,7 @@
 	; > (mostn #’length ’((a b) (a b c) (a) (e f g)))
 	; ( ((A B C) (E F G)) 3)
 (defun mostn (f l)
-	(mostn-helper f l dst hiscore))
+	(mostn-helper f l nil 0))
 
 ; Support mostn. Does all the heavy lifting.
 (defun mostn-helper (f src dst hiscore)
