@@ -1,12 +1,11 @@
-; The lisp function length counts the number of elements in the top level of a list. Write a function,
-; all-length, that takes a list and counts the number of atoms that occur in a list at all levels.
+; Takes a list and counts the number of atoms that occur in a list at all levels.
 (defun all-length (lst)
 	(cond
 		((null lst)  0)
 		((atom lst)  1)
 		((listp lst) (+ (all-length (car lst)) (all-length (cdr lst))))))
 
-; Define a function range that takes a list of numbers (with at least one element) and returns a list of
+; Given a list of numbers (with at least one element), returns a list of
 ; length 2 of the smallest and largest numbers.
 (defun range (lst)
 	(list (find-min lst (car lst)) (find-max lst (car lst))))
@@ -27,25 +26,25 @@
 			(cdr lst)
 			(if (> max (car lst)) max (car lst))))) ; max > lst[0] ? max : lst[0]
 
-; Write a function before that searches a list and returns a list of all elements in between the first two
-; arguments (inclusive).
-; 
-; If only the first argument appears in the list, before returns a list containing all the elements from the
-; first occurrence of the first argument to the end of the list.
+; Searches a list and returns a list of all elements that fall between list elements that match arguments 'start'
+; and 'finish' (inclusive).
+; If only the 'start' argument appears in the list, return a list containing all the elements from the
+; first occurrence of the 'start' argument to the end of the list.
 (defun before (start finish lst)
 	(if (equal start (car lst))
 		(cons start (until (cdr lst) finish))
 		(before start finish (cdr lst))))
 
-; Support function for before. Returns a list containing all elements from the beginning of lst to finish (inclusive).
+; Support function for 'before'. Returns a list containing all elements from the beginning of lst to a list item
+; that matches 'finish' (inclusive).
 (defun until (lst finish)
 	(cond 
 		((null lst) nil) ; empty list
 		((equal (car lst) finish) (list finish)) ; matches finish
 		(t (cons (car lst) (until (cdr lst) finish))))) ; recurse
 
-; Write a function split-if that returns a list into two parts. It takes two arguments: a function (f) and
-; a list. All members for which f is true go into one list, and the rest go into another list.
+; Takes two arguments: a function (f) and a list. Sorts all members of parameter list into two lists, one for
+; items for which applying f returns false and one for items for which f returns true.
 (defun split-if (f lst)
 	(list (filter (lambda (x) (not (funcall f x))) lst) (filter f lst)))
 
@@ -56,26 +55,23 @@
 		((funcall f (car lst)) (cons (car lst) (filter f (cdr lst))))
 		(t (filter f (cdr lst)))))
 
-; Write a function group that takes arguments: a list l and a number n. It returns a new list in which the
+; Takes arguments: a list l and a number n. It returns a new list in which the
 ; elements of l are grouped into sublists of length n. The remainder is put in a final sublist.
-(defun group (lst n)
-	(group-rec n lst nil))
+(defun group (lst n &optional dst)
+	(if (null lst) dst
+		(let ((accumulate_return (accumulate-n n lst nil)))
+			(group (car accumulate_return) n (append dst (cdr accumulate_return))))))
 
-; Support for group. 
-(defun group-rec (n src dst)
-	(if (null src) dst
-		(let ((accumulate_return (accumulate-n n src nil)))
-			(group-rec n (car accumulate_return) (append dst (cdr accumulate_return))))))
-
+; Support for 'group'.
 (defun accumulate-n (n src dst)
 	(if (or (null src) (eq n 0))
 		(list src dst)
 		(accumulate-n (1- n) (cdr src) (append dst (list (car src))))))
 
 
-; Write a function mostn that takes two arguments: a function f and a list l. It returns a list of all elements
-; for which the function yields the highest score (along with the score itself), where score the value returned
-; from the given function:
+; Takes two arguments: a function f and a list l. It returns a list of all elements
+; for which the function yields the highest score (along with the score itself), where score is the value returned
+; from the function provided as an argument. E.g.
 	; > (mostn #’length ’((a b) (a b c) (a) (e f g)))
 	; ( ((A B C) (E F G)) 3)
 (defun mostn (f l)
@@ -88,15 +84,16 @@
 			(cond
 				((> itemscore hiscore) ; change hiscore, replace dst
 					(mostn-helper f (cdr src) (list item) itemscore))
-				((= itemscore hiscore)
+				((= itemscore hiscore) ; don't change hiscore, add item to dst
 					(mostn-helper f (cdr src) (append dst (list item)) hiscore))
-				(t
+				(t                     ; recurse on (cdr src)
 					(mostn-helper f (cdr src) dst hiscore))
 			))))
 
-; Write a function match that compares a pattern and an assertion. When a pattern containing no special
+; Compares a pattern and an assertion. Both should be lists of atoms. When a pattern containing no special
 ; atoms is compared to an assertion, the two match only if they are exactly the same, with each corresponding
-; position occupied by the same atom.
+; position occupied by the same atom. Patterns may contain wildcards: ? for a single element and ! for one or
+; more elements.
 (defun match (pattern assertion)
 	(cond
 		((and (null pattern) (null assertion)) t) ; end of pattern and assertion
@@ -133,6 +130,9 @@
 						(match-var pattern (cdr assertion) (append aggregation (list (car assertion))))))
 				(t nil)))))
 
+; Supports match-var. Depending on whether any elements have been collected into aggregation, it sets
+; match-var's variable to a list terminating in the latest matched element of the assertion or to
+; the latest matched assertion as an atom.
 (defun match-var-set (pattern assertion aggregation)
 	(set (cadar pattern)
 		(if aggregation

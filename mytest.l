@@ -1,6 +1,10 @@
 (load 'hw4.l)
 
-(defun test (received expected) (pprint (if (equal received expected) 'ok (list 'ERR 'received received ': expected 'expected))))
+(setq err-count 0)
+
+(defun test (received expected) (if (equal received expected)
+	(pprint 'ok)
+	(and (pprint (list 'ERR 'received received ': expected 'expected)) (setq err-count (1+ err-count)))))
 
 ; test all-length
 (print 'all-length)
@@ -77,3 +81,5 @@
 (match-var '((! u) a (? v)) '(b c a d))
 (test u '(b c))
 (test v 'd)
+
+(pprint (list 'Error 'count ': err-count))
