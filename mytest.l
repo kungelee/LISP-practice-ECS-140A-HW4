@@ -68,3 +68,12 @@
 (test (match '(this table !) '(this table supports a block)) T)
 (test (match '(! brown) '(green red brown yellow)) NIL)
 (test (match '(! brown) '(green red brown brown)) T)
+
+; test match-var
+(print 'match-var)
+(match-var '(plus (? a) (? b)) '(plus 2 3))
+(test a 2)
+(test b 3)
+(match-var '((! u) a (? v)) '(b c a d))
+(test u '(b c))
+(test v 'd)

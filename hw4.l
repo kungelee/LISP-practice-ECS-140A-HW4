@@ -83,7 +83,7 @@
 
 ; Support mostn. Does all the heavy lifting.
 (defun mostn-helper (f src dst hiscore)
-	(if (eql nil src) (list dst hiscore)
+	(if (null src) (list dst hiscore)
 		(let* ((item (car src)) (itemscore (funcall f item)))
 			(cond
 				((> itemscore hiscore) ; change hiscore, replace dst
@@ -99,24 +99,42 @@
 ; position occupied by the same atom.
 (defun match (pattern assertion)
 	(cond
-		((and (null pattern) (null assertion))
-			t)
-		((or (null pattern) (null assertion))
-			nil)
-		((or
+		((and (null pattern) (null assertion)) t) ; end of pattern and assertion
+		((or (null pattern) (null assertion)) nil) ; end of pattern XOR assertion
+		((or ; match one atom (? or actual value)
 			(eql (car pattern) '?) ; single-atom wildcard
 			(eql (car pattern) (car assertion))) ; assertion matches pattern for current atom
 				(match (cdr pattern) (cdr assertion)))
 		((eql (car pattern) '!) ; multi-atom wildcard
-			(if (eql (cadr assertion) (cadr pattern))
-				(or
-					(match (cdr pattern) (cdr assertion))
-					(match pattern (cdr assertion)))
+			(or
+				(match (cdr pattern) (cdr assertion))
 				(match pattern (cdr assertion))))
-		(t nil))
-	)
+		(t nil)))
 
 ; Define a function match-var that extends match. The function match-var takes patterns con-
 ; taining pattern variables and matches them against assertions and assigns values to variables.
-; (defun match-var (pattern assertion)
-	; )
+(defun match-var (pattern assertion &optional aggregation)
+	(cond
+		((and (null pattern) (null assertion)) t) ; if we've reached the end of both pattern and assertion, we have a match
+		((or (null pattern) (null assertion)) nil) ; if pattern XOR assertion has ended, they are not a match
+		((eql (car pattern) (car assertion)) ; if assertion matches pattern for current atom, normal recursion
+			(match-var (cdr pattern) (cdr assertion)))
+		((listp (car pattern)) ; pattern item is a list (which represents a wildcard)
+			(cond
+				((eql (caar pattern) '?) ; single-atom wildcard: normal recursion; set variable if recursion returns true
+					(and (match-var (cdr pattern) (cdr assertion)) ; test for further (entire) match
+						(match-var-set pattern assertion aggregation) ; set variable
+						t)) ; evaluate to true for return value
+				((eql (caar pattern) '!) ; multi-atom wildcard: try normal recursion; fallback to recursion that only unshifts the assertion; set variable if recursion returns true
+					(or
+						(and (match-var (cdr pattern) (cdr assertion)) ; test for further (entire) match
+							(match-var-set pattern assertion aggregation) ; set variable
+							t) ; evaluate to true for return value
+						(match-var pattern (cdr assertion) (append aggregation (list (car assertion))))))
+				(t nil)))))
+
+(defun match-var-set (pattern assertion aggregation)
+	(set (cadar pattern)
+		(if aggregation
+			(append aggregation (list (car assertion)))
+			(car assertion))))
