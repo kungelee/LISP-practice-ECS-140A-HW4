@@ -30,10 +30,10 @@
 
 ; test before
 (print 'before)
-(test (before '(1 2 3 6 5 0 0 9 11 9) 6 9) '(6 5 0 0 9))
-(test (before '(1 2 (3) (6 4) (0 0) 9 (5) 11 9) '(6 4) '(5)) '((6 4) (0 0) 9 (5)))
-(test (before '(1 2 3 6 5 0 0 6 9 11 9) 6 6) '(6 5 0 0 6))
-(test (before '(1 2 3 6 5 0 0 9 11 9) 6 6) '(6 5 0 0 9 11 9))
+(test (before 6 9 '(1 2 3 6 5 0 0 9 11 9)) '(6 5 0 0 9))
+(test (before '(6 4) '(5) '(1 2 (3) (6 4) (0 0) 9 (5) 11 9)) '((6 4) (0 0) 9 (5)))
+(test (before 6 6 '(1 2 3 6 5 0 0 6 9 11 9)) '(6 5 0 0 6))
+(test (before 6 6 '(1 2 3 6 5 0 0 9 11 9)) '(6 5 0 0 9 11 9))
 
 ; test filter
 (print 'filter)
@@ -42,4 +42,13 @@
 
 ; test split-if
 (print 'split-if)
-(test (split-if (lambda (i) (< i 6)) '(9 4 7 11 67 22 2 0 88 3)) '((4 2 0 3) (9 7 11 67 22 88)))
+(test (split-if (lambda (i) (< i 6)) '(9 4 7 11 67 22 2 0 88 3)) '((9 7 11 67 22 88) (4 2 0 3)))
+(test (split-if #'(lambda (x) (> x 4)) '(1 2 3 4 5 6 7 8 9 10)) '((1 2 3 4) (5 6 7 8 9 10)))
+
+; test accumulate-n
+(print 'accumulate-n)
+(test (accumulate-n 3 '(a (b) c d (e f)) '()) '((d (e f)) (a (b) c)))
+
+(print 'group)
+(test (group '(a b c d e f g) 2) '((A B) (C D) (E F) (G)))
+

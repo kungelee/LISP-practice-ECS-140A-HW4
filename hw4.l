@@ -32,10 +32,10 @@
 ; 
 ; If only the first argument appears in the list, before returns a list containing all the elements from the
 ; first occurrence of the first argument to the end of the list.
-(defun before (lst start finish)
+(defun before (start finish lst)
 	(if (equal start (car lst))
 		(cons start (until (cdr lst) finish))
-		(before (cdr lst) start finish)))
+		(before start finish (cdr lst))))
 
 ; Support function for before. Returns a list containing all elements from the beginning of lst to finish (inclusive).
 (defun until (lst finish)
@@ -47,9 +47,9 @@
 ; Write a function split-if that returns a list into two parts. It takes two arguments: a function (f) and
 ; a list. All members for which f is true go into one list, and the rest go into another list.
 (defun split-if (f lst)
-	(list (filter f lst) (filter (lambda (x) (not (funcall f x))) lst)))
+	(list (filter (lambda (x) (not (funcall f x))) lst) (filter f lst)))
 
-; Support function for split-fi. Returns a list containing all elements of lst for which function f returns truthy.
+; Support function for split-if. Returns a list containing all elements of lst for which function f returns truthy.
 (defun filter (f lst)
 	(cond
 		((null lst) nil) ; input is empty: return empty
@@ -58,12 +58,26 @@
 
 ; Write a function group that takes arguments: a list l and a number n. It returns a new list in which the
 ; elements of l are grouped into sublists of length n. The remainder is put in a final sublist.
+(defun group (lst n)
+	(group-rec n lst nil))
+
+; Support for group. 
+(defun group-rec (n src dst)
+	(if (null src) dst
+		(let ((accumulate_return (accumulate-n n src nil)))
+			(group-rec n (car accumulate_return) (append dst (cdr accumulate_return))))))
+
+(defun accumulate-n (n src dst)
+	(if (or (null src) (eq n 0))
+		(list src dst)
+		(accumulate-n (1- n) (cdr src) (append dst (list (car src))))))
+
+
 ; Write a function mostn that takes two arguments: a function f and a list l. It returns a list of all elements
 ; for which the function yields the highest score (along with the score itself), where score the value returned
 ; from the given function:
 	; > (mostn #’length ’((a b) (a b c) (a) (e f g)))
 	; ( ((A B C) (E F G)) 3)
-; (defun group)
 
 ; Write a function match that compares a pattern and an assertion. When a pattern containing no special
 ; atoms is compared to an assertion, the two match only if they are exactly the same, with each corresponding
