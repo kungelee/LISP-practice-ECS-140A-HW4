@@ -49,8 +49,22 @@
 (print 'accumulate-n)
 (test (accumulate-n 3 '(a (b) c d (e f)) '()) '((d (e f)) (a (b) c)))
 
+; test group
 (print 'group)
 (test (group '(a b c d e f g) 2) '((A B) (C D) (E F) (G)))
 
+; test mostn-helper
 (print 'mostn-helper)
 (test (mostn-helper #'length '((a b) (a b c) (a) (e f g)) nil 0) '( ((A B C) (E F G)) 3))
+
+; test match
+(print 'match)
+(test (match '(color apple red) '(color apple red)) T)
+(test (match '(color apple red) '(color apple green)) NIL)
+(test (match '(color apple ?) '(color apple red)) T)
+(test (match '(color ? red) '(color apple red)) T)
+(test (match '(color ? red) '(color apple green)) NIL)
+(test (match '(! table !) '(this table supports a block)) T)
+(test (match '(this table !) '(this table supports a block)) T)
+(test (match '(! brown) '(green red brown yellow)) NIL)
+(test (match '(! brown) '(green red brown brown)) T)

@@ -78,7 +78,8 @@
 ; from the given function:
 	; > (mostn #’length ’((a b) (a b c) (a) (e f g)))
 	; ( ((A B C) (E F G)) 3)
-; (defun mostn ())
+(defun mostn (f l)
+	(mostn-helper f l dst hiscore))
 
 ; Support mostn. Does all the heavy lifting.
 (defun mostn-helper (f src dst hiscore)
@@ -96,8 +97,24 @@
 ; Write a function match that compares a pattern and an assertion. When a pattern containing no special
 ; atoms is compared to an assertion, the two match only if they are exactly the same, with each corresponding
 ; position occupied by the same atom.
-; (defun match (pattern assertion)
-	; )
+(defun match (pattern assertion)
+	(cond
+		((and (null pattern) (null assertion))
+			t)
+		((or (null pattern) (null assertion))
+			nil)
+		((or
+			(eql (car pattern) '?) ; single-atom wildcard
+			(eql (car pattern) (car assertion))) ; assertion matches pattern for current atom
+				(match (cdr pattern) (cdr assertion)))
+		((eql (car pattern) '!) ; multi-atom wildcard
+			(if (eql (cadr assertion) (cadr pattern))
+				(or
+					(match (cdr pattern) (cdr assertion))
+					(match pattern (cdr assertion)))
+				(match pattern (cdr assertion))))
+		(t nil))
+	)
 
 ; Define a function match-var that extends match. The function match-var takes patterns con-
 ; taining pattern variables and matches them against assertions and assigns values to variables.
